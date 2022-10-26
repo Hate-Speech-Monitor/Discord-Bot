@@ -14,4 +14,5 @@ def evaluate(content):
     total = 0
     for category in output.categories:
         total += int(category.id_)/100
-    return total
+    categories = [category.hierarchy for category in output.categories]
+    return total, categories
