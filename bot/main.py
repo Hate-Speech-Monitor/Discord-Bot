@@ -1,32 +1,26 @@
-import discord
-from dotenv import load_dotenv
 import os
+
+import discord
+from db import MongoDbHandler
+from dotenv import load_dotenv
+from utils import get_message_details
 
 load_dotenv()
 
-def getOffensiveInfo(message) : # TODO
-    pass
-
-def get_message_details(message : discord.Message) :
-    d = {}
-    d["content"] = message.content
-    d["author"] = message.author.id 
-    if message.guild : 
-        d["server"] = message.guild.id
-    else : 
-        d["server"] = None
-    return d
+DB = None
 
 class MyClient(discord.Client):
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
 
-    async def on_message(self, message : discord.Message):
+    async def on_message(self, message: discord.Message):
         print(get_message_details(message=message))
+
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-if __name__=="__main__" :
+if __name__ == "__main__":
+    DB = MongoDbHandler(os.environ["MONGO_CONNECTION_STRING"], os.environ["DB_PASSWORD"])
     client = MyClient(intents=intents)
     client.run(os.environ["DISCORD_CLIENT_SECRET"])
