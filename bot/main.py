@@ -15,9 +15,11 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
+
 @client.event
 async def on_ready():
     print("Bot Ready!")
+
 
 @client.event
 async def on_message(message: discord.Message):
@@ -30,20 +32,21 @@ async def on_message(message: discord.Message):
     else:
         print("User update failed")
 
+
 @tree.command(name="sync_commands", description="Synchronise commands to server")
-async def sync_commands(interaction : discord.Interaction):
+async def sync_commands(interaction: discord.Interaction):
     await tree.sync(guild=interaction.guild)
     await interaction.response.send_message("Synced Commands")
 
 
 @tree.command(name="get_top", description="Get top offensive users in server")
-async def get_top(interaction : discord.Interaction):
+async def get_top(interaction: discord.Interaction):
     offenders = DB.getTopOffensive(client, interaction.guild.id)
-    if len(offenders) == 0 : 
+    if len(offenders) == 0:
         await interaction.response.send_message("No Offenders! Server looks clean!")
-    else :
-        prompt = create_offensive_users_prompt(offenders) 
-        await interaction.response.send_message(prompt)
+    else:
+        prompt = create_offensive_users_prompt(offenders)
+        await interaction.response.send_message(embed=prompt)
 
 if __name__ == "__main__":
     DB = MongoDbHandler(os.environ["DB_URL"], os.environ["DB_PASSWORD"])
