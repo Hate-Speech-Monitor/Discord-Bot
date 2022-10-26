@@ -1,3 +1,6 @@
+from typing import Union
+
+import discord
 import pymongo
 from utils import UserMessage
 
@@ -20,7 +23,8 @@ class MongoDbHandler:
                     "author": existsUser['author'],
                     "server": existsUser['server']
                 }, {
-                    "$set": {"score": existsUser['score'] + message.score} # TODO
+                    # TODO
+                    "$set": {"score": existsUser['score'] + message.score}
                 })
             else:
                 self.db.users.insert_one({
@@ -33,11 +37,22 @@ class MongoDbHandler:
             print(e)
             return False
 
-    def getMostOffensiveUsers(self, server_id) -> list:
+    def getUserDetails(self, server_id, user_id) -> Union[dict, None]:
         try:
-            return self.db.users.find({
-                "server": server_id
-            }).sort("score")
+            return self.db.users.find_one({
+                "server": server_id,
+                "author": user_id
+            })
         except Exception as e:
             print(e)
-            return []
+            return None
+
+    def getTopOffensive(self, client: discord.Client, guild_id: int) -> list:
+        guild = client.get_guild(guild_id)
+        res = []
+        for member in guild.members:
+            data = self.getUserDetails(guild_id, member.id)
+            if data:
+                res.append({"name": member.display_name, "score": data["score"]})
+        sorted(res, key=lambda x: -x["score"])
+        return res

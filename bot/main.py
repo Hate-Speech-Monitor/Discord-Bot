@@ -3,15 +3,14 @@ import os
 import discord
 from db import MongoDbHandler
 from discord import app_commands
-from discord.ext import commands
 from dotenv import load_dotenv
-from utils import get_message_details
+from utils import create_offensive_users_prompt, get_message_details
 
 load_dotenv()
 
 DB = None
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.message_content = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
@@ -39,7 +38,12 @@ async def sync_commands(interaction : discord.Interaction):
 
 @tree.command(name="get_top", description="Get top offensive users in server")
 async def get_top(interaction : discord.Interaction):
-    await interaction.response.send_message("Hello I am bot")
+    offenders = DB.getTopOffensive(client, interaction.guild.id)
+    if len(offenders) == 0 : 
+        await interaction.response.send_message("No Offenders! Server looks clean!")
+    else :
+        prompt = create_offensive_users_prompt(offenders) 
+        await interaction.response.send_message(prompt)
 
 if __name__ == "__main__":
     DB = MongoDbHandler(os.environ["DB_URL"], os.environ["DB_PASSWORD"])
