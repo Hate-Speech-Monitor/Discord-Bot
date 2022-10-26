@@ -4,12 +4,22 @@ import os
 
 load_dotenv()
 
+def get_message_details(message : discord.Message) :
+    d = {}
+    d["content"] = message.content
+    d["author"] = message.author.id 
+    if message.guild : 
+        d["server"] = message.guild.id
+    else : 
+        d["server"] = None
+    return d
+
 class MyClient(discord.Client):
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
 
-    async def on_message(self, message):
-        print(f'Message from {message.author}: {message.content}')
+    async def on_message(self, message : discord.Message):
+        print(get_message_details(message=message))
 
 intents = discord.Intents.default()
 intents.message_content = True
