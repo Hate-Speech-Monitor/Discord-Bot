@@ -4,6 +4,9 @@ import os
 
 load_dotenv()
 
+def getOffensiveInfo(message) : # TODO
+    pass
+
 def get_message_details(message : discord.Message) :
     d = {}
     d["content"] = message.content
