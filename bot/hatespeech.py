@@ -11,4 +11,7 @@ client = ExpertAiClient()
 def evaluate(content):
     output = client.detection(body={"document": {"text": content}}, params={
                               'detector': detector, 'language': language})
-    return len(output.categories)
+    total = 0
+    for category in output.categories:
+        total += int(category.id_)/100
+    return total
