@@ -1,24 +1,33 @@
-import datetime
-from http import server
-
 import pymongo
-
-from bot.utils import UserMessage
+from utils import UserMessage
 
 
 class MongoDbHandler:
 
     def __init__(self, connection_string: str, password: str):
         self.conn_str = connection_string.replace('<password>', password)
-        self.client = pymongo.MongoClient(connection_string)
+        self.client = pymongo.MongoClient(self.conn_str)
         self.db = self.client["db"]
 
     def updateUserScore(self, message: UserMessage) -> bool:
         try:
-            self.db.users.update_one({
+            existsUser = self.db.users.find_one({
                 "author": message.author,
                 "server": message.server
-            }, {}, upsert=True)
+            })
+            if existsUser:
+                self.db.users.update_one({
+                    "author": existsUser['author'],
+                    "server": existsUser['server']
+                }, {
+                    "$set": {"score": existsUser['score'] + message.score}
+                })
+            else:
+                self.db.users.insert_one({
+                    "author": message.author,
+                    "server": message.server,
+                    "score": message.score
+                })
             return True
         except Exception as e:
             print(e)

@@ -1,3 +1,4 @@
+import random
 from typing import Union
 
 import discord
@@ -9,11 +10,9 @@ class UserMessage:
         self.author: int = 0
         self.server: Union[int,  None] = None
         self.score: int = 0
-
-
-def getOffensiveInfo(message):  # TODO
-    pass
-
+    
+    def getOffensiveInfo(self):  # TODO
+        self.score = random.randint(0, 100)
 
 def get_message_details(message: discord.Message) -> UserMessage:
     d = UserMessage()
@@ -21,4 +20,5 @@ def get_message_details(message: discord.Message) -> UserMessage:
     d.author = message.author.id
     if message.guild:
         d.server = message.guild.id
+    d.getOffensiveInfo()
     return d
