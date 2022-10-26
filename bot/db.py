@@ -20,7 +20,7 @@ class MongoDbHandler:
                     "author": existsUser['author'],
                     "server": existsUser['server']
                 }, {
-                    "$set": {"score": existsUser['score'] + message.score}
+                    "$set": {"score": existsUser['score'] + message.score} # TODO
                 })
             else:
                 self.db.users.insert_one({
