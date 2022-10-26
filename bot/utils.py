@@ -10,9 +10,15 @@ class UserMessage:
         self.author: int = 0
         self.server: Union[int,  None] = None
         self.score: int = 0
+        self.tags_count: dict = {}
 
     def getOffensiveInfo(self):
-        self.score = evaluate(self.content)
+        self.score, tags = evaluate(self.content)
+        for tag in tags:
+            if tag in self.tags_count:
+                self.tags_count[tag] += 1
+            else:
+                self.tags_count[tag] = 1
 
 
 def get_message_details(message: discord.Message) -> UserMessage:
