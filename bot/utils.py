@@ -1,6 +1,6 @@
 import random
 from typing import Union
-
+from hatespeech import evaluate
 import discord
 
 
@@ -10,9 +10,15 @@ class UserMessage:
         self.author: int = 0
         self.server: Union[int,  None] = None
         self.score: int = 0
+        self.tags_count: dict = {}
 
-    def getOffensiveInfo(self):  # TODO
-        self.score = random.randint(0, 100)
+    def getOffensiveInfo(self):
+        self.score, tags = evaluate(self.content)
+        for tag in tags:
+            if tag[0] in self.tags_count:
+                self.tags_count[tag[0]] += 1
+            else:
+                self.tags_count[tag[0]] = 1
 
 
 def get_message_details(message: discord.Message) -> UserMessage:
