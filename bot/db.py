@@ -60,11 +60,14 @@ class MongoDbHandler:
         res = []
         for member in guild.members:
             data = self.getUserDetails(guild_id, member.id)
-            if data:
-                res.append({
+            if not data : 
+                continue
+            df = {
                     "name": member.display_name,
                     "score": data["score"],
-                    "tags_count": data["tags_count"]
-                })
+                    "tags_count": data["tags_count"],
+                }
+            df["image_url"] = member.display_avatar.url
+            res.append(df)
         res = sorted(res, key=lambda x: -x["score"])
         return res
