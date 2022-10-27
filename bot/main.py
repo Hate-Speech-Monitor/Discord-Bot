@@ -6,6 +6,7 @@ import flask
 from db import MongoDbHandler
 from discord import app_commands
 from dotenv import load_dotenv
+from flask import request
 from flask_cors import CORS
 from utils import create_offensive_users_prompt, get_message_details
 
@@ -20,6 +21,7 @@ tree = app_commands.CommandTree(client)
 
 app = flask.Flask(__name__)
 CORS(app)
+
 
 @client.event
 async def on_ready():
@@ -52,26 +54,48 @@ async def get_top(interaction: discord.Interaction):
     else:
         prompt = create_offensive_users_prompt(offenders)
         await interaction.response.send_message(embed=prompt)
-        
-        
+
+
 @app.route('/getGuilds', methods=["GET"])
-def getGuilds() : 
+def getGuilds():
     data = []
-    for guild in client.guilds : 
+    for guild in client.guilds:
         df = {
-            "name" : guild.name,
+            "name": guild.name,
             "members": guild.member_count,
-            "guild_id": guild.id,
+            "guild_id": str(guild.id),
             "offenders": len(DB.getTopOffensive(client, guild.id))
         }
-        if guild.icon :
+        if guild.icon:
             df["icon"] = guild.icon.url
-        data.append(df)            
-    return flask.jsonify({"guilds" : data})
+        data.append(df)
+    return flask.jsonify({
+        "status": "success",
+        "data": data
+    }), 200
 
-def start_server() : 
+
+@app.route('/guild/getTop', methods=["GET"])
+def getTopOffenders():
+    guild_id = request.args.get("guild")
+    try:
+        guild_id = int(guild_id)
+    except Exception as e:
+        return flask.jsonify({
+            "status": "failed",
+            "message": "invalid guild id"
+        }), 400
+    offenders = DB.getTopOffensive(client, guild_id)
+    return flask.jsonify({
+        "status": "success",
+        "data": offenders
+    }), 200
+
+
+def start_server():
     print("Starting server")
     app.run(debug=False)
+
 
 if __name__ == "__main__":
     DB = MongoDbHandler(os.environ["DB_URL"], os.environ["DB_PASSWORD"])
