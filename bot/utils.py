@@ -1,7 +1,7 @@
-import random
 from typing import Union
-from hatespeech import evaluate
+
 import discord
+from hatespeech import evaluate
 
 
 class UserMessage:

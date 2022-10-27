@@ -1,5 +1,6 @@
-from dotenv import load_dotenv
 import json
+
+from dotenv import load_dotenv
 from expertai.nlapi.cloud.client import ExpertAiClient
 
 load_dotenv('.env.local')

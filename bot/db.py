@@ -19,18 +19,26 @@ class MongoDbHandler:
                 "server": message.server
             })
             if existsUser:
+                if "tags_count" not in existsUser:
+                    existsUser["tags_count"] = {}
+                tcd = existsUser["tags_count"]
+                for tag, count in message.tags_count.items():
+                    if tag in tcd:
+                        tcd[tag] += count
+                    else:
+                        tcd[tag] = count
                 self.db.users.update_one({
                     "author": existsUser['author'],
                     "server": existsUser['server']
                 }, {
-                    # TODO
-                    "$set": {"score": existsUser['score'] + message.score}
+                    "$set": {"score": existsUser['score'] + message.score, "tags_count": tcd}
                 })
             else:
                 self.db.users.insert_one({
                     "author": message.author,
                     "server": message.server,
-                    "score": message.score
+                    "score": message.score,
+                    "tags_count": message.tags_count
                 })
             return True
         except Exception as e:
@@ -53,6 +61,7 @@ class MongoDbHandler:
         for member in guild.members:
             data = self.getUserDetails(guild_id, member.id)
             if data:
-                res.append({"name": member.display_name, "score": data["score"]})
+                res.append({"name": member.display_name,
+                           "score": data["score"]})
         res = sorted(res, key=lambda x: -x["score"])
         return res
